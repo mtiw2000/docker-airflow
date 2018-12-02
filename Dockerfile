@@ -5,7 +5,7 @@
 # SOURCE: https://github.com/puckel/docker-airflow
 
 FROM python:3.6-slim
-LABEL maintainer="Puckel_"
+LABEL maintainer="mtiw2000"
 
 # Never prompts the user for choices on installation/configuration of packages
 ENV DEBIAN_FRONTEND noninteractive
@@ -24,6 +24,14 @@ ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV LC_CTYPE en_US.UTF-8
 ENV LC_MESSAGES en_US.UTF-8
+
+# Oracle Essentials
+ENV ORACLE_HOME /opt/oracle
+ENV ARCH x86_64
+ENV DYLD_LIBRARY_PATH /opt/oracle
+ENV LD_LIBRARY_PATH /opt/oracle
+
+
 
 RUN set -ex \
     && buildDeps=' \
@@ -72,6 +80,12 @@ RUN set -ex \
 
 COPY script/entrypoint.sh /entrypoint.sh
 COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
+COPY assets/oracle.zip  ${AIRFLOW_HOME}/oracle.zip
+
+RUN unzip ${AIRFLOW_HOME}/oracle.zip -d /opt \
+&& env ARCHFLAGS="-arch $ARCH" pip install cx_Oracle \
+&& rm ${AIRFLOW_HOME}/oracle.zip
+
 
 RUN chown -R airflow: ${AIRFLOW_HOME}
 
