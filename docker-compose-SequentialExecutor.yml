@@ -6,10 +6,6 @@ services:
             - POSTGRES_USER=airflow
             - POSTGRES_PASSWORD=airflow
             - POSTGRES_DB=airflow
-        ports:
-            - "5432:5432"
-        volumes:
-            - data-postgresql:/var/lib/postgresql
 
     webserver:
         image: mtiw2000/docker-airflow
@@ -18,27 +14,18 @@ services:
             - postgres
         environment:
             - LOAD_EX=n
-            - EXECUTOR=Local
+            - EXECUTOR=Sequential
             - FERNET_KEY=xeqouNCS2-3CwJ-u_mZHdZULvDz4YG--AvqPDbibdtM=
-            - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-          #  - AIRFLOW_CONN_XE_AZURE_HR=oracle://hr:manish@23.96.127.50:49161/XE
-
-
         volumes:
             - ./dags:/usr/local/airflow/dags
-          #  - ./data :/usr/local/airflow/airflow
+            - ./data :/usr/local/airflow/airflow
             # Uncomment to include custom plugins
             # - ./plugins:/usr/local/airflow/plugins
         ports:
             - "8080:8080"
-            - "8888:8888"
         command: webserver
         healthcheck:
             test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
             interval: 30s
             timeout: 30s
             retries: 3
-
-volumes:
-  data-postgresql:
-    external: true
